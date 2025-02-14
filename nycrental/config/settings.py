@@ -17,6 +17,7 @@ class Settings(BaseModel):
     BRIGHTDATA_HOST: str = Field(os.getenv("BRIGHTDATA_HOST"))
     BRIGHTDATA_USERNAME: str = Field(os.getenv("BRIGHTDATA_USERNAME"))
     BRIGHTDATA_PASSWORD: str = Field(os.getenv("BRIGHTDATA_PASSWORD"))
+    BRIGHTDATA_CERT_FILE: str = Field("nycrental/config/brightdata/cert.crt")
     NYC_BASE_URL: str = Field("https://www.nyc.gov")
     NYC_SOURCE_URL: str = Field(
         "https://www.nyc.gov/site/specialenforcement/reporting-law/class-b-mdl.page"
