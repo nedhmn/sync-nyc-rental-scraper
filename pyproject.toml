@@ -1,0 +1,17 @@
+[project]
+name = "simple-nyc-rental-scraper"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+cache-dir=".cache"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "pyarrow>=19.0.0",
+    "ruff>=0.9.6",
+]
