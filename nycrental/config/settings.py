@@ -18,7 +18,9 @@ class Settings(BaseModel):
     BRIGHTDATA_USERNAME: str = Field(os.getenv("BRIGHTDATA_USERNAME"))
     BRIGHTDATA_PASSWORD: str = Field(os.getenv("BRIGHTDATA_PASSWORD"))
     NYC_BASE_URL: str = Field("https://www.nyc.gov")
-    NYC_SOURCE_URL: str = Field("https://www.nyc.gov/site/hpd/services-and-information/sro-buildings-list.page")
+    NYC_SOURCE_URL: str = Field(
+        "https://www.nyc.gov/site/specialenforcement/reporting-law/class-b-mdl.page"
+    )
     SE_BASE_URL: str = Field("https://streeteasy.com/search")
     BOROUGHS_TO_KEEP: List = Field(["MANHATTAN"])
     NUM_THREADS: int = Field(10)
