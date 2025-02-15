@@ -61,6 +61,7 @@ class PipelineOrchestrator:
                     try:
                         results.append(future.result())
                         consecutive_errors = 0  # Reset counter on success
+
                     except Exception as e:
                         consecutive_errors += 1
                         logger.error(f"Error processing {row['address']}: {str(e)}")
