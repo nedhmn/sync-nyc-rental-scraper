@@ -47,25 +47,38 @@ class PipelineOrchestrator:
 
             # Process listings
             results = []
+            consecutive_errors = 0
             logger.info("Starting listing extraction...")
+
             with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                 future_to_row = {
                     executor.submit(self._process_listing, row): row
-                    for _, row in addresses_df.head(50).iterrows()
+                    for _, row in addresses_df.iterrows()
                 }
 
                 for future in as_completed(future_to_row):
                     row = future_to_row[future]
                     try:
                         results.append(future.result())
+                        consecutive_errors = 0  # Reset counter on success
 
                     except Exception as e:
+                        consecutive_errors += 1
                         logger.error(f"Error processing {row['address']}: {str(e)}")
-                        raise
+
+                        if consecutive_errors >= 10:
+                            # Cancel remaining tasks and exit
+                            for f in future_to_row:
+                                f.cancel()
+                            logger.error("10 consecutive errors - aborting pipeline")
+                            break
 
             # Load results
             results_df = pd.DataFrame(results)
             results_df.to_csv(self.output_csv_file, index=False)
+
+            if consecutive_errors >= 10:
+                raise RuntimeError("Aborted due to consecutive errors")
 
             logger.info("Pipeline completed successfully")
 
