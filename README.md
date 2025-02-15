@@ -14,7 +14,7 @@ The main goal is to reliably determine if a given address has active listings on
 
 ## BrightData Web Unlocker API
 
-This project utilizes BrightData's Web Unlocker API for reliable scraping. From the [official documentation](https://help.brightdata.com/hc/en-us/articles/15845898476945-Web-Unlocker-API):
+This project utilizes BrightData's Web Unlocker API for reliable scraping. From the [official documentation](https://docs.brightdata.com/scraping-automation/web-unlocker/introduction):
 
 ### Overview
 
