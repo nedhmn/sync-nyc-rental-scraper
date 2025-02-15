@@ -23,16 +23,19 @@ class Settings(BaseModel):
         "https://www.nyc.gov/site/specialenforcement/reporting-law/class-b-mdl.page"
     )
     SE_BASE_URL: str = Field("https://streeteasy.com/search")
-    BOROUGHS_TO_KEEP: List = Field(["MANHATTAN"])
-    MAX_WORKERS: int = Field(10)
-    TIMEOUT: int = Field(20)
+    BOROUGHS_TO_KEEP: List = Field(
+        ["MANHATTAN"], description="Keep addresses that are in these borough(s)"
+    )
+    MAX_WORKERS: int = Field(30)
+    TIMEOUT: int = Field(30)
     PHRASE_LIST: List = Field(
         [
             "no results found",
             "we couldn't find any matches",
             "try searching in a different area",
             "there were no matches for",
-        ]
+        ],
+        description="When scraping an address from street-easy, if a page says any of these then there were no results.",
     )
 
 
