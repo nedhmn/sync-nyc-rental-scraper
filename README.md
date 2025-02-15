@@ -37,8 +37,8 @@ This project utilizes BrightData's Web Unlocker API for reliable scraping. From 
 
 ## Prerequisites
 
-- Python 3.12+
-- Docker Compose
+- Python 3.12+ (if using Python)
+- Docker Compose (if using Docker)
 - BrightData account with Web Unlocker access
 
 ## Installation
@@ -61,6 +61,15 @@ BRIGHTDATA_HOST=your_host
 3. Ensure the `compose.yml` file is present in the project root.
 
 ## Usage
+
+Install packages and run script:
+
+```bash
+uv sync --frozen
+uv run py -m scripts.nycrental_pipeline
+```
+
+or...
 
 Build and run using Docker Compose:
 
