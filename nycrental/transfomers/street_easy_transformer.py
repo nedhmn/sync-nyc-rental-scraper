@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Optional, Tuple
+from typing import Tuple, List
 
 import bs4
 import pandas as pd
@@ -53,23 +53,34 @@ class StreetEasyTransformer:
             raise
 
     @staticmethod
-    def _clean_address(address: str) -> Optional[str]:
-        if not address:
-            return None
+    def _clean_address(addresses: List[str]) -> List[str]:
+        """Clean address string for comparison.
 
-        # Remove special characters and extra whitespace
-        cleaned = re.sub(r"[^a-zA-Z0-9\s]", "", address)
+        Performs the following transformations:
+        - Converts to lowercase
+        - Removes all punctuation
+        - Removes ordinal suffixes (st, nd, rd, th)
+        - Normalizes whitespace
 
-        # Convert to lowercase and remove extra spaces
-        return " ".join(cleaned.lower().strip().split())
+        Args:
+            address: Input address string or None
+        """
+        # #emove ordinal suffixes and punctuation
+        pattern = re.compile(r"(?<=\d)(?:st|nd|rd|th)\b|\W+")
 
-    def _compare_addresses(self, original_address: str, scraped_address: str) -> bool:
+        # Process all addresses
+        return [
+            " ".join(pattern.sub(" ", addr.lower()).split())
+            for addr in addresses
+            if addr
+        ]
+
+    def _compare_addresses(self, addresses: List[str]) -> bool:
         """Compare two addresses after cleaning"""
-        cleaned_original_address = self._clean_address(original_address)
-        cleaned_scraped_address = self._clean_address(scraped_address)
+        cleaned_addresses = self._clean_address(addresses)
 
-        # Compare addresses
-        return cleaned_original_address == cleaned_scraped_address
+        # Check if addresses are equal
+        return len(set(cleaned_addresses)) == 1
 
     def transform_listing(self, row: pd.Series, html_content: str) -> pd.Series:
         """Transform raw HTML into structured data"""
@@ -81,7 +92,7 @@ class StreetEasyTransformer:
             unit_name, unit_address = self._extract_building_info(soup)
             has_listing = self._has_listing(html_content)
             same_address = (
-                self._compare_addresses(row["address"], unit_address)
+                self._compare_addresses([row["address"], unit_address])
                 if unit_address
                 else None
             )
