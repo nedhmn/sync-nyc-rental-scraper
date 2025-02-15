@@ -6,7 +6,6 @@ import httpx
 import pandas as pd
 from tenacity import (
     after_log,
-    before_sleep_log,
     retry,
     retry_if_exception_type,
     stop_after_attempt,
@@ -37,7 +36,6 @@ class StreetEasyExtractor:
         retry=retry_if_exception_type(
             (httpx.TimeoutException, httpx.HTTPError, httpx.RemoteProtocolError)
         ),
-        before_sleep=before_sleep_log(logger, logging.INFO),
         after=after_log(logger, logging.INFO),
     )
     def fetch_listing(self, row: pd.Series) -> Tuple[pd.Series, str]:
@@ -50,8 +48,5 @@ class StreetEasyExtractor:
         ) as client:
             response = client.get(row["se_initial_url"])
             response.raise_for_status()
-
-            # Add final URL after redirects to the row
-            row["se_redirected_url"] = response.url
 
             return row, response.text

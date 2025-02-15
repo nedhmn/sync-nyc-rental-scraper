@@ -1,6 +1,7 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pandas as pd
 
@@ -10,7 +11,7 @@ from nycrental.extractors.street_easy_extractor import StreetEasyExtractor
 from nycrental.transfomers.street_easy_transformer import StreetEasyTransformer
 from nycrental.utils.logger import setup_logger
 
-setup_logger()
+setup_logger(Path(settings.OUTPUT_LOG_FILE))
 logger = logging.getLogger("scripts.nycrental_pipeline")
 
 
@@ -21,7 +22,8 @@ class PipelineOrchestrator:
         self.address_extractor = AddressExtractor(settings)
         self.street_easy_extractor = StreetEasyExtractor(settings)
         self.street_easy_transformer = StreetEasyTransformer(settings)
-        self.num_threads = settings.NUM_THREADS
+        self.max_workers = settings.MAX_WORKERS
+        self.output_csv_file = settings.OUTPUT_CSV_FILE
 
     def _process_listing(self, row: pd.Series) -> pd.Series:
         """Process single listing with error handling"""
@@ -46,10 +48,10 @@ class PipelineOrchestrator:
             # Process listings
             results = []
             logger.info("Starting listing extraction...")
-            with ThreadPoolExecutor(max_workers=self.num_threads) as executor:
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                 future_to_row = {
                     executor.submit(self._process_listing, row): row
-                    for _, row in addresses_df.head(5).iterrows()
+                    for _, row in addresses_df.head(50).iterrows()
                 }
 
                 for future in as_completed(future_to_row):
@@ -63,7 +65,8 @@ class PipelineOrchestrator:
 
             # Load results
             results_df = pd.DataFrame(results)
-            logger.info(f"Number of results: {len(results_df)}")
+            results_df.to_csv(self.output_csv_file, index=False)
+
             logger.info("Pipeline completed successfully")
 
         except Exception as e:
