@@ -24,7 +24,7 @@ class Settings(BaseModel):
     )
     SE_BASE_URL: str = Field("https://streeteasy.com/search")
     BOROUGHS_TO_KEEP: List = Field(["MANHATTAN"])
-    NUM_THREADS: int = Field(10)
+    MAX_WORKERS: int = Field(10)
     TIMEOUT: int = Field(20)
     PHRASE_LIST: List = Field(
         [

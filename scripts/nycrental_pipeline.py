@@ -22,7 +22,7 @@ class PipelineOrchestrator:
         self.address_extractor = AddressExtractor(settings)
         self.street_easy_extractor = StreetEasyExtractor(settings)
         self.street_easy_transformer = StreetEasyTransformer(settings)
-        self.num_threads = settings.NUM_THREADS
+        self.max_workers = settings.MAX_WORKERS
         self.output_csv_file = settings.OUTPUT_CSV_FILE
 
     def _process_listing(self, row: pd.Series) -> pd.Series:
@@ -48,7 +48,7 @@ class PipelineOrchestrator:
             # Process listings
             results = []
             logger.info("Starting listing extraction...")
-            with ThreadPoolExecutor(max_workers=self.num_threads) as executor:
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                 future_to_row = {
                     executor.submit(self._process_listing, row): row
                     for _, row in addresses_df.head(50).iterrows()
