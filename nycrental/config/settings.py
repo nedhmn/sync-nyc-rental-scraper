@@ -26,6 +26,14 @@ class Settings(BaseModel):
     BOROUGHS_TO_KEEP: List = Field(["MANHATTAN"])
     NUM_THREADS: int = Field(10)
     TIMEOUT: int = Field(20)
+    PHRASE_LIST: List = Field(
+        [
+            "no results found",
+            "we couldn't find any matches",
+            "try searching in a different area",
+            "there were no matches for",
+        ]
+    )
 
 
 settings = Settings()

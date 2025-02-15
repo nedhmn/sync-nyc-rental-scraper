@@ -1,12 +1,13 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict
+from datetime import datetime, timezone
 
 import pandas as pd
 
-from nycrental.config.settings import settings, Settings
+from nycrental.config.settings import Settings, settings
 from nycrental.extractors.address_extractor import AddressExtractor
 from nycrental.extractors.street_easy_extractor import StreetEasyExtractor
+from nycrental.transfomers.street_easy_transformer import StreetEasyTransformer
 from nycrental.utils.logger import setup_logger
 
 setup_logger()
@@ -19,17 +20,21 @@ class PipelineOrchestrator:
     def __init__(self, settings: Settings):
         self.address_extractor = AddressExtractor(settings)
         self.street_easy_extractor = StreetEasyExtractor(settings)
+        self.street_easy_transformer = StreetEasyTransformer(settings)
         self.num_threads = settings.NUM_THREADS
 
-    def _process_listing(self, row: pd.Series) -> Dict:
+    def _process_listing(self, row: pd.Series) -> pd.Series:
         """Process single listing with error handling"""
         try:
             row, html = self.street_easy_extractor.fetch_listing(row)
-            print(row, html[:5])
-            return html
+            row = self.street_easy_transformer.transform_listing(row, html)
+
         except Exception as e:
             logger.error(f"Error processing {row['address']}: {str(e)}")
-            return None
+            row["status"] = "failed"
+
+        row["updated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        return row
 
     def run(self):
         """Execute the pipeline"""
@@ -50,13 +55,15 @@ class PipelineOrchestrator:
                 for future in as_completed(future_to_row):
                     row = future_to_row[future]
                     try:
-                        result = future.result()
-                        if result:
-                            results.append(result)
+                        results.append(future.result())
+
                     except Exception as e:
                         logger.error(f"Error processing {row['address']}: {str(e)}")
+                        raise
 
             # Load results
+            results_df = pd.DataFrame(results)
+            logger.info(f"Number of results: {len(results_df)}")
             logger.info("Pipeline completed successfully")
 
         except Exception as e:
