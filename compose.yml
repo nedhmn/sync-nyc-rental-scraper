@@ -1,0 +1,10 @@
+name: nycrental
+
+services:
+  nycrental:
+    container_name: nycrental
+    build: .
+    command: ["python3", "-m", "scripts.nycrental_pipeline"]
+    env_file: ./.env
+    volumes:
+      - ./data:/app/data/
